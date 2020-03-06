@@ -29,20 +29,20 @@ void setup() {
   while(!_bme.begin(0x76));
 
   last_reading = _bme.readPressure() / 100.0F;
-  digitalWrite(STEADY, HIGH);
-  digitalWrite(UP, HIGH);
-  digitalWrite(DOWN, HIGH);
+  previousMillis = millis();
 }
 
 void loop() {
 
-  if (analogRead(A0) < 500)
-  {
+  if (analogRead(A0) < 500){
     digitalWrite(STEADY, LOW); 
     digitalWrite(UP, LOW); 
     digitalWrite(DOWN, LOW); 
-  } else 
-  {
+  } else if (last_direction == -1){
+    digitalWrite(STEADY, HIGH); 
+    digitalWrite(UP, HIGH); 
+    digitalWrite(DOWN, HIGH); 
+  } else {
     digitalWrite(last_direction, HIGH);
   }
 
