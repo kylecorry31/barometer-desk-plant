@@ -8,23 +8,21 @@ Adafruit_BME280 barometer{};
 TriColorLED led{2, 3, 4};
 LightSensor light_sensor{A0};
 
-long min_pressure = 99000L;
-long max_pressure = 101000L;
+long min_pressure;
+long max_pressure;
 
 void setup() {
-  Serial.begin(9600);
-
   while(!barometer.begin(0x76));
+
+  long pressure = GetPressure();
+  min_pressure = pressure - 100L;
+  max_pressure = pressure + 100L;
 }
 
 void loop() {
-  long pressure = (long)round(barometer.readPressure());
+  long pressure = GetPressure();
   min_pressure = min(pressure, min_pressure);
   max_pressure = max(pressure, max_pressure);
-
-  Serial.print(min_pressure);
-  Serial.print(',');
-  Serial.println(max_pressure);
   
   if (light_sensor.IsDark()){
     led.Off();  
@@ -32,6 +30,10 @@ void loop() {
     int pressure_amount = (int)map(pressure, min_pressure, max_pressure, 0, 255);
     SetColor(pressure_amount);
   }
+}
+
+long GetPressure(){
+  return (long)round(barometer.readPressure());  
 }
 
 void SetColor(int amount){
