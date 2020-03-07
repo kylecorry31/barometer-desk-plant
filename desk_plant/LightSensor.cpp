@@ -6,7 +6,7 @@ LightSensor::LightSensor(int pin){
 }
 
 bool LightSensor::IsDark(){
-  return GetLight() < 500;  
+  return GetLight() < 400;  
 }
 
 bool LightSensor::IsLight(){
