@@ -5,18 +5,25 @@
 #include "LightSensor.h"
 
 Adafruit_BME280 barometer{};
-TriColorLED led{2, 3, 4};
+TriColorLED led{5, 3, 2};
 LightSensor light_sensor{A0};
+
+#define ADAPTIVE_PRESSURE true
 
 long min_pressure;
 long max_pressure;
 
-void setup() {
+void setup() {  
   while(!barometer.begin(0x76));
 
   long pressure = GetPressure();
-  min_pressure = pressure - 100L;
-  max_pressure = pressure + 100L;
+  if (ADAPTIVE_PRESSURE){
+    min_pressure = pressure - 100L;
+    max_pressure = pressure + 100L;
+  } else {
+    min_pressure = 99000L;
+    max_pressure = 101000L;  
+  }
 }
 
 void loop() {
@@ -37,7 +44,7 @@ long GetPressure(){
 }
 
 void SetColor(int amount){
-  int r = min(255, 255 - amount + 125);
+  int r = 255 - amount;
   int g = amount;
   led.On(r, g, 0);  
 }
