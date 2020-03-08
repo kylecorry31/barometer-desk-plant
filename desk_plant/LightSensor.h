@@ -10,9 +10,9 @@ class LightSensor {
   
   public:
     LightSensor(int pin);
-    bool IsLight();
-    bool IsDark();
-    int GetLight();
+    bool isLight();
+    bool isDark();
+    int getLight();
   
 };
 

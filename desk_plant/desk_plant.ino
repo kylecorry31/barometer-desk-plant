@@ -1,57 +1,88 @@
-#include <Wire.h>
-#include <Adafruit_Sensor.h>
-#include <Adafruit_BME280.h>
 #include "TriColorLED.h"
 #include "LightSensor.h"
+#include "Barometer.h"
 
-Adafruit_BME280 barometer{};
+// The light will only be on when it is light out
+const int MODE_LIGHT_ON = 0;
+
+// The light will only be on when it is dark out
+const int MODE_DARK_ON = 1;
+
+// The light will always be on
+const int MODE_ALWAYS_ON = 2;
+
+
+// ----- CONFIGURATION -----
+
+// Change this value to adjust how long it will take for the plant to adapt to the local pressure
+const long adaptedThreshold = 800L; // 8 hPa
+
+// Change these values to adjust the default high and low pressures
+const long defaultMinPressure = 99500L; // 995 hPa
+const long defaultMaxPressure = 101000L; // 1010 hPa
+
+// Change this to control when the plant's light will be on
+const byte onStrategy = MODE_LIGHT_ON;
+
+// ----- END CONFIGURATION -----
+
+
 TriColorLED led{5, 3, 2};
-LightSensor light_sensor{A0};
+LightSensor lightSensor{A0};
+Barometer barometer{};
 
-const long adapted_threshold = 800L; // 8 hPa
-
-long default_min_pressure = 99500L; // 995 hPa
-long default_max_pressure = 101800L; // 1018 hPa
-
-long min_pressure;
-long max_pressure;
+// The min/max seen pressures
+long minPressure = 1000000L;
+long maxPressure = 0L;
 
 void setup() {  
-  while(!barometer.begin(0x76));
-
-  long pressure = GetPressure();
-  min_pressure = pressure;
-  max_pressure = pressure;
+  barometer.begin();
+  long pressure = barometer.getPressure();
+  adaptToPressure(pressure);
 }
 
 void loop() {
-  long pressure = GetPressure();
-  min_pressure = min(pressure, min_pressure);
-  max_pressure = max(pressure, max_pressure);
+  long pressure = barometer.getPressure();
+  adaptToPressure(pressure);
 
-  long actual_min_pressure = min(min_pressure, default_min_pressure);
-  long actual_max_pressure = max(max_pressure, default_max_pressure);
+  long actualMinPressure = min(minPressure, defaultMinPressure);
+  long actualMaxPressure = max(maxPressure, defaultMaxPressure);
 
-  if (max_pressure - min_pressure >= adapted_threshold){
-    // Plant has adapted to environment
-    actual_min_pressure = min_pressure;
-    actual_max_pressure = max_pressure;  
+  if (isAdapted()){
+    actualMinPressure = minPressure;
+    actualMaxPressure = maxPressure;  
   }
   
-  if (light_sensor.IsDark()){
-    led.Off();  
+  if (shouldBeOff()){
+    led.off();  
   } else {
-    int pressure_amount = (int)map(pressure, actual_min_pressure, actual_max_pressure, 0, 255);
-    SetColor(pressure_amount);
+    int pressureAmount = (int)map(pressure, actualMinPressure, actualMaxPressure, 0, 255);
+    setColor(pressureAmount);
   }
 }
 
-long GetPressure(){
-  return (long)round(barometer.readPressure());  
+bool shouldBeOff(){
+  switch (onStrategy){
+    case MODE_DARK_ON:
+      return lightSensor.isLight();
+    case MODE_LIGHT_ON:
+      return lightSensor.isDark();
+    default:
+      return false;
+  }
 }
 
-void SetColor(int amount){
+void adaptToPressure(long pressure){
+  minPressure = min(pressure, minPressure);
+  maxPressure = max(pressure, maxPressure);
+}
+
+bool isAdapted(){
+  return maxPressure - minPressure >= adaptedThreshold;
+}
+
+void setColor(int amount){
   int r = 255 - amount;
   int g = amount;
-  led.On(r, g, 0);  
+  led.on(r, g, 0);  
 }

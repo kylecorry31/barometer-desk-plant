@@ -6,14 +6,14 @@
 class TriColorLED {
 
   private:
-    int _r;
-    int _g;
-    int _b;
+    int r_;
+    int g_;
+    int b_;
 
   public:
     TriColorLED(int r_pin, int g_pin, int b_pin);
-    void On(int r, int g, int b);
-    void Off();
+    void on(int r, int g, int b);
+    void off();
 };
 
 #endif

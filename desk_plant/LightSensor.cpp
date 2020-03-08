@@ -5,14 +5,14 @@ LightSensor::LightSensor(int pin){
   pinMode(pin_, INPUT);  
 }
 
-bool LightSensor::IsDark(){
-  return GetLight() < 400;  
+bool LightSensor::isDark(){
+  return getLight() < 400;  
 }
 
-bool LightSensor::IsLight(){
-  return !IsDark();  
+bool LightSensor::isLight(){
+  return !isDark();  
 }
 
-int LightSensor::GetLight(){
+int LightSensor::getLight(){
   return analogRead(pin_);  
 }
