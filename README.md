@@ -22,6 +22,9 @@ I wanted a unique bioluminescent plant as a decoration for my desk at work that 
 - Hot glue
 - Solder or breadboard (either) 
 
+## Libraries Required
+- [Adafruit BME280 Library](https://github.com/adafruit/Adafruit_BME280_Library)
+
 ## Assembly
 1. Using a breadboard or soldering directly to the Arduino, connect all the electronic components according to the diagram below. Note: Ensure that the photoresistor and LED have long enough wires to span the height of the pot.
 ![Schematic](assets/schematic.png)
@@ -44,7 +47,7 @@ I wanted a unique bioluminescent plant as a decoration for my desk at work that 
 
 10. Ensure the photoresistor is not covered by moss, and pack everything neatly into the pot.
 
-11. Using the Arduino IDE load this sketch onto the Arduino.
+11. Upload this sketch onto the Arduino after installing the required library.
 
 12. Provide power to the USB cable and you are done. It may take a few days for the plant to adapt to the pressure at your location - disrupting power will reset this.
 
