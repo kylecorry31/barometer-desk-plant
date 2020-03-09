@@ -24,18 +24,22 @@ const long defaultMaxPressure = 101000L; // 1010 hPa
 // Change this to control when the plant's light will be on
 const byte onStrategy = MODE_LIGHT_ON;
 
+// The altitude of the plant in meters
+const float altitudeMeters = 30.48;
+
 // ----- END CONFIGURATION -----
 
 
 TriColorLED led{5, 3, 2};
 LightSensor lightSensor{A0};
-Barometer barometer{};
+Barometer barometer{altitudeMeters};
 
 // The min/max seen pressures
 long minPressure = 1000000L;
 long maxPressure = 0L;
 
 void setup() {  
+  Serial.begin(9600);
   barometer.begin();
   long pressure = barometer.getPressure();
   adaptToPressure(pressure);
@@ -44,6 +48,8 @@ void setup() {
 void loop() {
   long pressure = barometer.getPressure();
   adaptToPressure(pressure);
+
+  Serial.println(pressure / 100.0f);
 
   long actualMinPressure = min(minPressure, defaultMinPressure);
   long actualMaxPressure = max(maxPressure, defaultMaxPressure);

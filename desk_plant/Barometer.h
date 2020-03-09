@@ -7,12 +7,13 @@
 #include <Adafruit_BME280.h>
 
 class Barometer {
-
-    private:
-        Adafruit_BME280 barometer_{};
     public:
+        Barometer(float altitudeMeters);
         void begin();
         long getPressure();
+    private:
+        Adafruit_BME280 barometer_{};
+        float altitudeMeters_;
 };
 
 #endif
