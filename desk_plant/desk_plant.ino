@@ -18,8 +18,8 @@ const int MODE_ALWAYS_ON = 2;
 const long adaptedThreshold = 800L; // 8 hPa
 
 // Change these values to adjust the default high and low pressures
-const long defaultMinPressure = 100500L; // 1005 hPa
-const long defaultMaxPressure = 101800L; // 1018 hPa
+const long defaultMinPressure = 100900L; // 1009 hPa
+const long defaultMaxPressure = 102200L; // 1022 hPa
 
 // Change this to control when the plant's light will be on
 const byte onStrategy = MODE_LIGHT_ON;
