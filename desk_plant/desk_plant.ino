@@ -2,30 +2,20 @@
 #include "LightSensor.h"
 #include "Barometer.h"
 
-// The light will only be on when it is light out
-const int MODE_LIGHT_ON = 0;
-
-// The light will only be on when it is dark out
-const int MODE_DARK_ON = 1;
-
-// The light will always be on
-const int MODE_ALWAYS_ON = 2;
-
-
 // ----- CONFIGURATION -----
 
-// Change this value to adjust how long it will take for the plant to adapt to the local pressure
-const long adaptedThreshold = 800L; // 8 hPa
-
 // Change these values to adjust the default high and low pressures
-const long defaultMinPressure = 100900L; // 1009 hPa
-const long defaultMaxPressure = 102200L; // 1022 hPa
-
-// Change this to control when the plant's light will be on
-const byte onStrategy = MODE_LIGHT_ON;
+const long minPressure = 100900L; // 1009 hPa
+const long maxPressure = 102200L; // 1022 hPa
 
 // The altitude of the plant in meters
-const float altitudeMeters = 30.48;
+const float altitudeMeters = 36;
+
+// The maximum brightness when it is dark out
+const int maxNightBrightness = 0;
+
+// The maximum brightness when it is light out
+const int maxDayBrightness = 255;
 
 // ----- END CONFIGURATION -----
 
@@ -34,61 +24,30 @@ TriColorLED led{5, 3, 2};
 LightSensor lightSensor{A0};
 Barometer barometer{altitudeMeters};
 
-// The min/max seen pressures
-long minPressure = 1000000L;
-long maxPressure = 0L;
-
 void setup() {  
   Serial.begin(9600);
   barometer.begin();
-  long pressure = barometer.getPressure();
-  adaptToPressure(pressure);
 }
 
 void loop() {
   long pressure = barometer.getPressure();
-  adaptToPressure(pressure);
 
   Serial.println(pressure / 100.0f);
 
-  long actualMinPressure = min(minPressure, defaultMinPressure);
-  long actualMaxPressure = max(maxPressure, defaultMaxPressure);
+  int maxBrightness = 0;
 
-  if (isAdapted()){
-    actualMinPressure = minPressure;
-    actualMaxPressure = maxPressure;  
-  }
-  
-  if (shouldBeOff()){
-    led.off();  
+  if (lightSensor.isLight()){
+    maxBrightness = maxDayBrightness;
   } else {
-    int pressureAmount = (int)map(pressure, actualMinPressure, actualMaxPressure, 0, 255);
-    setColor(pressureAmount);
+    maxBrightness = maxNightBrightness;
   }
+
+  int pressureAmount = min(maxBrightness, max(0, (int)map(pressure, minPressure, maxPressure, 0, maxBrightness)));
+  setColor(pressureAmount, maxBrightness);
 }
 
-bool shouldBeOff(){
-  switch (onStrategy){
-    case MODE_DARK_ON:
-      return lightSensor.isLight();
-    case MODE_LIGHT_ON:
-      return lightSensor.isDark();
-    default:
-      return false;
-  }
-}
-
-void adaptToPressure(long pressure){
-  minPressure = min(pressure, minPressure);
-  maxPressure = max(pressure, maxPressure);
-}
-
-bool isAdapted(){
-  return maxPressure - minPressure >= adaptedThreshold;
-}
-
-void setColor(int amount){
-  int r = 255 - amount;
+void setColor(int amount, int maxBrightness){
+  int r = maxBrightness - amount;
   int g = amount;
   led.on(r, g, 0);  
 }
