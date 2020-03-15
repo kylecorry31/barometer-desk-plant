@@ -9,10 +9,10 @@ const long minPressure = 100900L; // 1009 hPa
 const long maxPressure = 102200L; // 1022 hPa
 
 // The altitude of the plant in meters
-const float altitudeMeters = 36;
+const float altitudeMeters = 126;//36;
 
 // The maximum brightness when it is dark out
-const int maxNightBrightness = 0;
+const int maxNightBrightness = 16;
 
 // The maximum brightness when it is light out
 const int maxDayBrightness = 255;
@@ -20,7 +20,7 @@ const int maxDayBrightness = 255;
 // ----- END CONFIGURATION -----
 
 
-TriColorLED led{5, 3, 2};
+TriColorLED led{5, 3, 6};
 LightSensor lightSensor{A0};
 Barometer barometer{altitudeMeters};
 
