@@ -10,7 +10,9 @@ void Barometer::begin(){
     #endif
     
     #ifdef Arduino_BLE
-    BARO.begin();
+    while(!BARO.begin()){
+      delay(20);
+    }
     #endif
 }
 
