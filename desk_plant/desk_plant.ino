@@ -12,7 +12,7 @@ const long maxPressure = 102200L; // 1022 hPa
 const float altitudeMeters = 126;//36;
 
 // The maximum brightness when it is dark out
-const int maxNightBrightness = 16;
+const int maxNightBrightness = 0;
 
 // The maximum brightness when it is light out
 const int maxDayBrightness = 255;
