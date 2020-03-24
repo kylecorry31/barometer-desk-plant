@@ -7,6 +7,6 @@ void Barometer::begin(){
     while(!barometer_.begin(0x76));
 }
 
-long Barometer::getPressure(){
+long Barometer::getPressure(){  
     return barometer_.readPressure();
 }

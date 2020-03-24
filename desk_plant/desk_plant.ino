@@ -5,8 +5,8 @@
 // ----- CONFIGURATION -----
 
 // Change these values to adjust the default high and low pressures
-const long minPressure = -600L; // -6 hPa / 3 hr
-const long maxPressure = 600L; // 6 hPa / 3 hr
+const long minPressure = -300L; // -3 hPa / 3 hr
+const long maxPressure = 300L; // 3 hPa / 3 hr
 
 // The maximum brightness when it is dark out
 const int maxNightBrightness = 0;
@@ -14,11 +14,12 @@ const int maxNightBrightness = 0;
 // The maximum brightness when it is light out
 const int maxDayBrightness = 255;
 
+const long updateInterval = 60L * 1000L;
+const int historyLength = 180;
+
 // ----- END CONFIGURATION -----
 
-#define HISTORY_LENGTH 180
-
-long history[HISTORY_LENGTH];
+long history[historyLength];
 int historySize = 0;
 int historyIdx = 0;
 
@@ -32,8 +33,8 @@ void setup() {
   Serial.begin(9600);
   barometer.begin();
   history[0] = barometer.getPressure();
-  historySize++;
-  historyIdx++;
+  historySize = 1;
+  historyIdx = 0;
   lastTime = millis();
 }
 
@@ -48,23 +49,20 @@ void loop() {
     maxBrightness = maxNightBrightness;
   }
 
-  if (millis() - lastTime >= 60000L){
-    historySize++;
-    historySize %= HISTORY_LENGTH; 
-  }
-
   long first;
   
-  if (historySize == HISTORY_LENGTH){
+  if (historySize == historyLength){
     // Already full
-    first = history[(historyIdx + 1) % HISTORY_LENGTH];
+    first = history[(historyIdx + 1) % historyLength];
   } else {
     first = history[0];
   }
 
-  if (millis() - lastTime >= 60000L){
+  if (millis() - lastTime >= updateInterval){
+    historySize++;
+    historySize = min(historySize, historyLength); 
     historyIdx++;
-    historyIdx %= HISTORY_LENGTH;
+    historyIdx %= historyLength;
     history[historyIdx] = pressure;
     lastTime = millis();
   }
@@ -76,6 +74,8 @@ void loop() {
   int pressureAmount = min(maxBrightness, max(0, (int)map(tendency, minPressure, maxPressure, 0, maxBrightness)));
   setColor(pressureAmount, maxBrightness);  
 }
+
+
 
 void setColor(int amount, int maxBrightness){
   int r = maxBrightness - amount;
