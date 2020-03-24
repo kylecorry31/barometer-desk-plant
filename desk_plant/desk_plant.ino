@@ -5,11 +5,8 @@
 // ----- CONFIGURATION -----
 
 // Change these values to adjust the default high and low pressures
-const long minPressure = 100900L; // 1009 hPa
-const long maxPressure = 102200L; // 1022 hPa
-
-// The altitude of the plant in meters
-const float altitudeMeters = 126;//36;
+const long minPressure = -600L; // -6 hPa / 3 hr
+const long maxPressure = 600L; // 6 hPa / 3 hr
 
 // The maximum brightness when it is dark out
 const int maxNightBrightness = 0;
@@ -19,20 +16,29 @@ const int maxDayBrightness = 255;
 
 // ----- END CONFIGURATION -----
 
+#define HISTORY_LENGTH 180
+
+long history[HISTORY_LENGTH];
+int historySize = 0;
+int historyIdx = 0;
+
+long lastTime = 0;
 
 TriColorLED led{5, 3, 6};
 LightSensor lightSensor{A0};
-Barometer barometer{altitudeMeters};
+Barometer barometer{};
 
 void setup() {  
   Serial.begin(9600);
   barometer.begin();
+  history[0] = barometer.getPressure();
+  historySize++;
+  historyIdx++;
+  lastTime = millis();
 }
 
 void loop() {
   long pressure = barometer.getPressure();
-
-  Serial.println(pressure / 100.0f);
 
   int maxBrightness = 0;
 
@@ -42,8 +48,33 @@ void loop() {
     maxBrightness = maxNightBrightness;
   }
 
-  int pressureAmount = min(maxBrightness, max(0, (int)map(pressure, minPressure, maxPressure, 0, maxBrightness)));
-  setColor(pressureAmount, maxBrightness);
+  if (millis() - lastTime >= 60000L){
+    historySize++;
+    historySize %= HISTORY_LENGTH; 
+  }
+
+  long first;
+  
+  if (historySize == HISTORY_LENGTH){
+    // Already full
+    first = history[(historyIdx + 1) % HISTORY_LENGTH];
+  } else {
+    first = history[0];
+  }
+
+  if (millis() - lastTime >= 60000L){
+    historyIdx++;
+    historyIdx %= HISTORY_LENGTH;
+    history[historyIdx] = pressure;
+    lastTime = millis();
+  }
+
+  long tendency = pressure - first;
+
+  Serial.println(tendency);
+  
+  int pressureAmount = min(maxBrightness, max(0, (int)map(tendency, minPressure, maxPressure, 0, maxBrightness)));
+  setColor(pressureAmount, maxBrightness);  
 }
 
 void setColor(int amount, int maxBrightness){

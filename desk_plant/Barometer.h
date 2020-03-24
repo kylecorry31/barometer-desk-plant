@@ -7,12 +7,11 @@
 
 class Barometer {
     public:
-        Barometer(float altitudeMeters);
+        Barometer();
         void begin();
         long getPressure();
     private:
         Adafruit_BME280 barometer_{};
-        float altitudeMeters_;
 };
 
 #endif
